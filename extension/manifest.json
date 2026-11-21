@@ -4,7 +4,7 @@
     "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'none'"
   },
   "name": "Codex 飞书侧栏",
-  "version": "3.0",
+  "version": "3.0.1",
   "description": "在 Chrome 侧栏用本机 Codex 阅读和编辑飞书文档。",
   "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA4ny9Fa3QxdpO0jyD4fC43UuWb/PwA5uWlMGA5V4PQ4N2v3y35V1doezvZuHZixD2CwmLY4A/s1IQ498QPeL83cM5qq0ctvqAMx9Eej7EGfgp57XFKm4q0Aq2uts2R/dcev2mkYChgiKEwHbx2tRU4sTt6SdS9FEb1zXmUW3q9C2/RDjbgJBIc0FuP2HqIvxbnG8YCKGresLd6766Rt/RQCyqiiJS4WbEVsJQ8//5spUJfpRwpirD78LzprbHEkbpZPjALxevYlSbIQHkNQfdHKeoWCIZeh7sXw927RGA4MhMgxU4LcKHvfGB5z+tE4q5+lYJqGlj/QAKEGujNeNRbQIDAQAB",
   "permissions": [

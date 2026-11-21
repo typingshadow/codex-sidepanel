@@ -9,7 +9,7 @@ let commandLock = NSLock()
 let manager = FileManager.default
 let home = manager.homeDirectoryForCurrentUser
 let hostName = "local.codex_sidepanel"
-let connectorVersion = "3.0"
+let connectorVersion = "3.0.1"
 
 struct ConnectorPolicy: Decodable {
     let clientName: String

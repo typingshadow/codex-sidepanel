@@ -21,6 +21,38 @@ def error(request_id, message):
     return {"id": request_id, "error": {"code": -32602, "message": message}}
 
 
+def check_feishu_document(document, cli):
+    url = urlsplit(document) if isinstance(document, str) else None
+    parts = url.path.split("/") if url else []
+    if (not url or url.scheme != "https" or not url.hostname or url.netloc != url.hostname
+            or not any(url.hostname == domain or url.hostname.endswith("." + domain)
+                       for domain in ("feishu.cn", "larksuite.com", "doubao.com"))
+            or len(parts) != 3 or parts[1] not in ("docx", "wiki")
+            or not parts[2].isascii() or not parts[2].isalnum() or url.query or url.fragment):
+        raise ValueError("请打开有效的飞书文档，再重试。")
+    if not cli:
+        raise ValueError("连接器找不到本机飞书 CLI。")
+    try:
+        result = subprocess.run(
+            [cli, "docs", "+fetch", "--as", "user", "--doc", document,
+             "--doc-format", "markdown", "--scope", "outline", "--max-depth", "1"],
+            cwd=Path.home(), stdin=subprocess.DEVNULL, stdout=subprocess.PIPE,
+            stderr=subprocess.DEVNULL, timeout=20,
+        )
+    except subprocess.TimeoutExpired:
+        raise ValueError("飞书 CLI 读取超时。请检查网络和钥匙串授权弹窗。") from None
+    except OSError:
+        raise ValueError("无法启动飞书 CLI。请在系统终端用同一个 CLI 复测。") from None
+    if result.returncode:
+        raise ValueError(f"飞书 CLI 读取失败（退出码 {result.returncode}）。请在系统终端用同一个 CLI 复测。")
+    try:
+        response = json.loads(result.stdout)
+    except (ValueError, UnicodeError):
+        response = None
+    if not isinstance(response, dict) or response.get("ok") is not True:
+        raise ValueError("飞书 CLI 未返回可验证的读取结果。请在系统终端用同一个 CLI 复测。")
+
+
 def workspace_registry():
     return Path.home() / "Library/Application Support/Codex Browser Connector/Workspaces"
 
@@ -186,7 +218,7 @@ def safe_event(packet):
     return packet
 
 
-def run_server(codex, workspace):
+def run_server(codex, workspace, lark=None):
     home = Path.home()
     lark_paths = [home / "Library/Application Support/lark-cli"]
     if shutil.which("codex-lark-cli"):
@@ -209,6 +241,7 @@ def run_server(codex, workspace):
         allowed = {}
         account_checked = False
         picker_lock = threading.Lock()
+        feishu_lock = threading.Lock()
 
         def forward(packet):
             with write_lock:
@@ -264,6 +297,15 @@ def run_server(codex, workspace):
             finally:
                 picker_lock.release()
 
+        def check_document(request_id, document):
+            try:
+                check_feishu_document(document, lark)
+                reply({"id": request_id, "result": {"readable": True}})
+            except ValueError as exc:
+                reply(error(request_id, str(exc)))
+            finally:
+                feishu_lock.release()
+
         reader = threading.Thread(target=relay, daemon=True)
         reader.start()
         try:
@@ -288,6 +330,14 @@ def run_server(codex, workspace):
                 packet = json.loads(payload)
                 request_id, method = packet.get("id"), packet.get("method")
                 try:
+                    if method == "feishu/check" and request_id is not None:
+                        params = packet.get("params")
+                        document = params.get("document") if isinstance(params, dict) else None
+                        if feishu_lock.acquire(blocking=False):
+                            threading.Thread(target=check_document, args=(request_id, document), daemon=True).start()
+                        else:
+                            reply(error(request_id, "已有飞书读取检查正在执行，请稍后重试。"))
+                        continue
                     if method == "workspace/pick":
                         if picker_lock.acquire(blocking=False):
                             threading.Thread(target=choose_directory, args=(request_id,), daemon=True).start()
@@ -323,10 +373,11 @@ def run_server(codex, workspace):
 
 def main():
     codex, workspace = sys.argv[1:]
-    send({"bridgeInfo": {"larkCli": bool(shutil.which("codex-lark-cli") or shutil.which("lark-cli")), "protocol": 3, "workspaces": True,
+    lark = shutil.which("codex-lark-cli") or shutil.which("lark-cli")
+    send({"bridgeInfo": {"larkCli": bool(lark), "larkCheck": True, "connectorVersion": "3.0.1 (Python)", "protocol": 3, "workspaces": True,
                          "workspaceManagement": True, "groupEditing": True}})
     try:
-        run_server(codex, workspace)
+        run_server(codex, workspace, lark)
     except OSError as exc:
         print(exc, file=sys.stderr)
         send({"bridgeError": "找不到本机 Codex。" if not Path(codex).exists() else "本机连接器无法启动 Codex。"})

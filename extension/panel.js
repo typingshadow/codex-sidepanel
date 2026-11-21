@@ -663,11 +663,11 @@ function feishuFailure(detail) {
     "检查项目：连接器以 --as user 只读请求当前飞书文档的一级大纲。",
     "报错信息：" + detail,
     "",
-    "1. 核对 Chrome 实际连接的本机连接器及它调用的 lark-cli。在系统终端执行 command -v lark-cli 和 lark-cli --version，对比路径和版本。",
+    "1. 若提示连接器不支持检查，请先更新连接器。用源码安装的用户请更新源码并重新运行 python3 install.py；用安装包的用户请安装配套的新版 Mac 连接器。然后关闭并重新打开侧栏。",
     "2. 运行 lark-cli auth status --json --verify，确认 CLI 使用的是我的现有飞书账号。需要复现时，用当前文档链接替换下面的占位符：",
     '   lark-cli docs +fetch --as user --doc "<当前飞书文档链接>" --doc-format markdown --scope outline --max-depth 1',
     "3. 根据报错处理：钥匙串访问失败时检查 Mac 是否已解锁，以及是否有授权弹窗。若终端能读、侧栏失败，请对比两个执行环境。授权失效时，用原飞书账号重新授权。文档权限不足时，确认该账号有阅读权限。若找不到 CLI，先查现有安装和连接器的 PATH，再决定是否需要安装。",
-    "4. 若提示连接器版本不支持检查，请从同一新版安装包安装 Mac 连接器并更新 Chrome 扩展。修复后关闭并重新打开侧栏，确认顶部飞书图标前显示绿点。",
+    "4. 连接器优先使用 codex-lark-cli，再查找 lark-cli。用步骤 2 中的命令复测时，请换成实际使用的 CLI。修复后确认顶部飞书图标前显示绿点。",
     "保留现有账号和配置，别重置钥匙串、删除凭据或修改文档。反馈原始错误时请隐去令牌、密钥和文档内容。"
   ].join("\n");
   $("feishu-copy-status").textContent = "";
