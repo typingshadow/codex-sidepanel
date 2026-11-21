@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="blue">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Codex 飞书侧栏</title>
+  <link rel="stylesheet" href="panel.css">
+</head>
+<body>
+  <header class="toolbar">
+    <div class="service-status" id="codex-status-area">
+      <img class="service-logo" src="codex-mark.png" width="20" height="20" alt="Codex">
+      <div id="status" role="status">正在连接本机…</div>
+      <button type="button" id="reconnect" hidden>重新连接</button>
+    </div>
+    <div class="service-status" id="feishu-status-area" hidden>
+      <img class="service-logo" src="feishu-mark.png" width="20" height="20" alt="飞书">
+      <span id="tool-status" role="status"></span>
+      <button type="button" id="feishu-details-button" popovertarget="feishu-details" hidden>详情</button>
+    </div>
+    <div class="toolbar-actions">
+      <button type="button" class="icon" id="history-button" popovertarget="history" aria-label="会话与设置" title="会话与设置">⋯</button>
+      <button type="button" class="icon new-chat" id="new" aria-label="新会话" title="新会话">＋</button>
+    </div>
+    <section id="feishu-details" popover aria-labelledby="feishu-details-title">
+      <strong id="feishu-details-title">飞书读取检查失败</strong>
+      <p>将以下报错信息粘贴给您的 Codex 执行修复错误。</p>
+      <textarea id="feishu-diagnostic" aria-label="给 Codex 的修复指令和报错信息" readonly rows="10"></textarea>
+      <button type="button" id="copy-feishu-diagnostic">复制给 Codex</button>
+      <span id="feishu-copy-status" role="status"></span>
+    </section>
+  </header>
+  <div id="appearance" popover aria-labelledby="appearance-title">
+    <strong id="appearance-title">外观设置</strong>
+    <label for="color-theme">主题
+      <select id="color-theme">
+        <option value="blue" selected>雾瓷蓝</option>
+        <option value="classic">经典</option>
+      </select>
+    </label>
+    <label for="font-size">对话字号
+      <select id="font-size">
+        <option value="14">14 px</option>
+        <option value="15">15 px</option>
+        <option value="16" selected>16 px</option>
+        <option value="17">17 px</option>
+        <option value="18">18 px</option>
+        <option value="20">20 px</option>
+        <option value="22">22 px</option>
+        <option value="24">24 px</option>
+        <option value="26">26 px</option>
+      </select>
+    </label>
+    <label for="font-family">字形
+      <select id="font-family">
+        <option value="system">系统字体</option>
+        <option value="serif">宋体风格</option>
+      </select>
+    </label>
+  </div>
+  <section id="history" popover aria-labelledby="history-title">
+    <div class="history-header">
+      <strong id="history-title">历史会话</strong>
+      <button type="button" id="history-archive-view" hidden>已归档</button>
+    </div>
+    <p id="history-feedback" role="status" hidden></p>
+    <div id="history-list"></div>
+    <div class="more-actions">
+      <button type="button" class="history-entry" id="workspace-button" disabled>工作目录</button>
+      <button type="button" class="history-entry" id="appearance-button">外观设置</button>
+    </div>
+  </section>
+  <section id="workspace-menu" popover aria-labelledby="workspace-title">
+    <strong id="workspace-title">工作目录</strong>
+    <div id="workspace-list"></div>
+    <p id="workspace-error" role="status" hidden></p>
+    <button type="button" id="workspace-pick">选择或新建文件夹…</button>
+  </section>
+  <main class="dialogue" aria-label="对话">
+    <button type="button" id="older-messages" hidden>加载更早的消息</button>
+    <div id="messages"></div>
+    <div class="welcome">
+      <img class="welcome-logo" src="codex-mark.png" width="48" height="48" alt="">
+      <h1 id="welcome-title">当前聚焦页</h1>
+      <p id="connection-help" hidden></p>
+      <div class="connection-actions">
+        <a id="install-connector" target="_blank" rel="noopener noreferrer" hidden>下载 Mac 连接器</a>
+        <a id="install-codex" href="https://learn.chatgpt.com/docs/cli" target="_blank" rel="noopener noreferrer" hidden>安装 Codex</a>
+        <button type="button" id="retry" hidden>重新检查连接</button>
+      </div>
+    </div>
+  </main>
+  <footer>
+    <form id="composer">
+      <div id="reference" hidden>
+        <a id="url" target="_blank" rel="noreferrer"></a>
+        <button type="button" id="remove" class="icon" aria-label="取消引用" title="取消引用">×</button>
+      </div>
+      <div class="composer-status">
+        <div id="progress" hidden>
+          <span class="progress-dot" aria-hidden="true"></span>
+          <span id="progress-label" role="status"></span>
+          <span id="progress-time"></span>
+        </div>
+        <span id="composer-pet" data-pose="idle" aria-hidden="true">
+          <canvas id="composer-pet-canvas" width="162" height="162"></canvas>
+        </span>
+      </div>
+      <div class="composer-input">
+        <textarea id="question" aria-label="问题" rows="4" maxlength="12000"></textarea>
+        <div id="attachments" hidden></div>
+        <p id="attachment-status" role="status" hidden></p>
+        <input id="attachment-picker" type="file" multiple hidden accept=".png,.jpg,.jpeg,.webp,.gif,.pdf,.docx,.xlsx,.pptx,.csv,.tsv,.txt,.md">
+        <input id="folder-picker" type="file" webkitdirectory multiple hidden>
+        <div class="composer-actions">
+          <div id="attachment-control">
+            <button type="button" id="add-attachment" aria-label="添加附件" title="添加附件" aria-expanded="false" aria-controls="attachment-options">＋</button>
+            <div id="attachment-options" hidden>
+              <button type="button" id="choose-file">选择图片或文件</button>
+              <button type="button" id="choose-folder">选择文件夹</button>
+            </div>
+          </div>
+          <button type="button" id="web-workspaces-button" aria-label="网页工作区" aria-haspopup="dialog" aria-expanded="false" data-scope-tone="single">
+            <strong id="current-scope">单页会话</strong>
+          </button>
+          <div class="focus-control" id="focus-control" hidden>
+            <button type="button" id="composer-target" aria-haspopup="menu" aria-expanded="false" aria-controls="focus-menu">
+              <span id="composer-target-name"></span>
+            </button>
+            <div id="focus-menu" role="menu" aria-label="选择聚焦页面" hidden></div>
+          </div>
+          <div class="effort-control">
+            <button type="button" id="effort" aria-haspopup="menu" aria-expanded="false" aria-controls="effort-menu" aria-label="思考强度：中">
+              <span id="effort-value">中</span>
+            </button>
+            <div id="effort-menu" role="menu" aria-label="思考强度" hidden>
+              <button type="button" role="menuitemradio" data-effort="low" aria-checked="false">低</button>
+              <button type="button" role="menuitemradio" data-effort="medium" aria-checked="true">中</button>
+              <button type="button" role="menuitemradio" data-effort="high" aria-checked="false">高</button>
+            </div>
+          </div>
+          <button type="button" class="action" id="stop" aria-label="停止生成" title="停止生成" hidden>■</button>
+          <button type="submit" class="action" id="send" aria-label="发送" title="发送（Enter）" disabled>↑</button>
+        </div>
+      </div>
+    </form>
+  </footer>
+  <script src="release.js"></script>
+  <script src="page-context.js"></script>
+  <script src="vendor/marked.umd.js"></script>
+  <script src="markdown.js"></script>
+  <script src="vendor/rive/rive.js"></script>
+  <script src="panel.js"></script>
+</body>
+</html>

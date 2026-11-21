@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="zh-CN">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Codex 飞书侧栏</title><link rel="stylesheet" href="workspace.css"></head>
+<body>
+  <section id="web-workspaces" popover aria-labelledby="web-workspaces-title">
+    <div class="menu-header">
+      <button type="button" id="workspace-back" class="icon-button" aria-label="返回" hidden>‹</button>
+      <h1 id="web-workspaces-title" tabindex="-1">网页工作区</h1>
+    </div>
+    <section id="workspace-overview">
+      <button type="button" id="single-page" class="workspace-option">
+        <span class="workspace-icon" aria-hidden="true">▤</span><span class="option-name">单页会话</span>
+        <span class="selection-check" aria-hidden="true">✓</span>
+      </button>
+      <div id="web-workspace-list"></div>
+      <div class="menu-footer">
+        <button type="button" id="new-workspace"><span>＋ 新建工作区</span><span aria-hidden="true">›</span></button>
+        <button type="button" id="recycle-sessions">回收闲置会话</button>
+        <p id="session-count" class="menu-note"></p>
+        <p class="menu-note">后台会话闲置 2 小时后自动回收，可从历史会话恢复。任务和草稿会保留。</p>
+        <p id="session-recycle-result" class="menu-note" role="status"></p>
+      </div>
+    </section>
+    <section id="active-workspace" hidden aria-label="当前工作区">
+      <div class="workspace-summary">
+        <div><strong id="active-workspace-label"></strong><div id="active-workspace-count"></div></div>
+        <button type="button" id="rename-workspace" class="secondary">改名</button>
+      </div>
+      <div id="active-workspace-pages"></div>
+      <div class="menu-footer">
+        <button type="button" id="add-workspace-pages"><span>＋ 添加已打开的网页</span><span aria-hidden="true">›</span></button>
+        <button type="button" id="delete-workspace"><span>删除工作区</span></button>
+      </div>
+    </section>
+    <form id="add-pages-form" hidden>
+      <div id="add-page-options"></div>
+      <button type="submit" id="add-pages-submit" class="primary" disabled>添加网页</button>
+    </form>
+    <form id="rename-web-workspace" hidden>
+      <label for="active-workspace-name">名称</label>
+      <input id="active-workspace-name" maxlength="40" required>
+      <p id="rename-workspace-error" class="form-error" role="status" hidden></p>
+      <button type="submit" class="primary">保存名称</button>
+    </form>
+    <form id="create-web-workspace" hidden>
+      <label for="web-workspace-name">名称</label>
+      <input id="web-workspace-name" maxlength="40" required>
+      <label id="create-include-current"><input id="include-current-page" type="checkbox"> 加入当前网页</label>
+      <p id="create-workspace-error" class="form-error" role="status" hidden></p>
+      <button type="submit" class="primary">新建工作区</button>
+    </form>
+  </section>
+  <button id="enable-pages" type="button" hidden>允许按网页切换会话</button>
+  <main id="pages"></main>
+  <script src="page-context.js"></script>
+  <script src="web-workspaces.js"></script>
+  <script src="workspace.js"></script>
+</body>
+</html>
